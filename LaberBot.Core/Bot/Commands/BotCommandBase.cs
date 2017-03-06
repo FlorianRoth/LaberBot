@@ -27,10 +27,14 @@
         
         public abstract Task ExecuteAsync(CommandEventArgs args);
         
-        protected Task RespondAsync(CommandEventArgs args, string message)
+        protected Task SendMessageToChannelAsync(CommandEventArgs args, string message)
         {
             return args.Channel.SendMessage(message);
         }
 
+        protected Task SendPrivateMessageAsync(CommandEventArgs args, string message)
+        {
+            return args.User.SendMessage(message);
+        }
     }
 }

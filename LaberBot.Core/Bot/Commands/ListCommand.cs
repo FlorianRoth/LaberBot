@@ -29,7 +29,7 @@
                 builder.Append(sound);
             }
 
-            await RespondAsync(args, builder.ToString());
+            await SendPrivateMessageAsync(args, builder.ToString());
         }
     }
 }

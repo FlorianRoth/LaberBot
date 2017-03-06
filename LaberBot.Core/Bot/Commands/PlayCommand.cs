@@ -37,7 +37,7 @@
             
             if (null == file)
             {
-                await RespondAsync(args, $"Sound '{sound}' does not exist");
+                await SendMessageToChannelAsync(args, $"Sound '{sound}' does not exist");
                 return;
             }
 

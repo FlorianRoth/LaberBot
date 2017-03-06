@@ -38,13 +38,13 @@
             var user = args.Message.User;
             if (!user.Roles.Contains(role))
             {
-                await RespondAsync(args, $"{user.Name}, you have no permission to upload sound files!");
+                await SendMessageToChannelAsync(args, $"{user.Name}, you have no permission to upload sound files!");
                 return;
             }
 
             foreach (var attachment in args.Message.Attachments)
             {
-                await RespondAsync(args, $"Uploading {attachment.Filename}...");
+                await SendMessageToChannelAsync(args, $"Uploading {attachment.Filename}...");
                 await DownloadAttachment(args, attachment);
             }
         }
@@ -55,7 +55,7 @@
             if (upload.IsAccepted == false)
             {
                 Logger.Warn($"Upload {upload.OriginalName} was not accepted!");
-                await RespondAsync(args, $"The file {upload.OriginalName} cannot be uploaded!");
+                await SendMessageToChannelAsync(args, $"The file {upload.OriginalName} cannot be uploaded!");
                 return;
             }
 
@@ -69,13 +69,13 @@
                     myWebClient.DownloadFile(uri, upload.FilePath);
                     
                     Logger.Debug("Download complete");
-                    await RespondAsync(args, $"The file {upload.OriginalName} has been uploaded as '{Path.GetFileNameWithoutExtension(upload.FilePath)}'");
+                    await SendMessageToChannelAsync(args, $"The file {upload.OriginalName} has been uploaded as '{Path.GetFileNameWithoutExtension(upload.FilePath)}'");
                     await args.Channel.SendTTSMessage("Geil");
                 }
                 catch (Exception ex)
                 {
                     Logger.Error(ex.Message, ex);
-                    await RespondAsync(args, $"The file {upload.OriginalName} cannot be uploaded!");
+                    await SendMessageToChannelAsync(args, $"The file {upload.OriginalName} cannot be uploaded!");
                 }
             }
         }

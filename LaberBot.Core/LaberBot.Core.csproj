@@ -100,9 +100,12 @@
     <Compile Include="Bot\IAudioPlayer.cs" />
     <Compile Include="Bot\IBotCommand.cs" />
     <Compile Include="Bot\ILaberBot.cs" />
+    <Compile Include="Bot\ISoundFile.cs" />
     <Compile Include="Bot\ISoundRepository.cs" />
     <Compile Include="Bot\LaberBot.cs" />
+    <Compile Include="Bot\SoundFile.cs" />
     <Compile Include="Bot\SoundRepository.cs" />
+    <Compile Include="Bot\UploadRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

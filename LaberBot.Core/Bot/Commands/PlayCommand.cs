@@ -51,7 +51,7 @@
                 return;
             }
             
-            await _player.PlayAsync(voiceChannel, file);
+            await _player.PlayAsync(voiceChannel, file.Path);
         }
 
         private Channel GetVoiceChannel(CommandEventArgs args)

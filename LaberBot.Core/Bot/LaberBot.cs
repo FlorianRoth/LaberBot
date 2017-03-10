@@ -72,6 +72,8 @@
         private async Task Connect()
         {
             await _client.Connect(Configuration.AuthToken, TokenType.Bot);
+            
+            Logger.Info("Connected to server");
 
             _client.SetGame("Bortogen");
         }
@@ -113,7 +115,7 @@
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Logger.Error(ex.Message, ex);
             }
         }
     }

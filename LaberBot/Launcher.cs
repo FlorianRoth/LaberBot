@@ -1,11 +1,11 @@
 ﻿namespace LaberBot
 {
-    using System;
     using System.ComponentModel.Composition.Hosting;
 
     using log4net;
 
     using LaberBot.Bot;
+    using LaberBot.Bot.CommandLine;
 
     public static class Launcher
     {
@@ -14,9 +14,9 @@
         public static void Run(string[] args)
         {
             var container = SetupContainer();
-            var config = CreateConfiguration(args);
+            EvaluateCommandLine(args, container);
 
-            Run(config, container);
+            Run(container);
         }
 
         private static CompositionContainer SetupContainer()
@@ -29,31 +29,20 @@
             return container;
         }
 
-        private static BotConfiguration CreateConfiguration(string[] args)
+        private static void EvaluateCommandLine(string[] args, CompositionContainer container)
         {
-            Logger.Debug("Creating bot configuration");
+            Logger.Debug("Evaluating command line");
 
-            if (args.Length != 2)
-            {
-                Logger.Debug("Creating bot configuration");
-                throw new ArgumentException("Invalid number of command line arguments.");
-            }
-
-            var config = new BotConfiguration
-            {
-                AuthToken = args[0],
-                SoundDirectory = args[1]
-            };
-
-            return config;
+            var commandLineParser = container.GetExportedValue<ICommandLineParser>();
+            commandLineParser.Parse(args);
         }
-
-        private static void Run(BotConfiguration config, CompositionContainer container)
+        
+        private static void Run(CompositionContainer container)
         {
             Logger.Debug("Starting bot");
 
             var bot = container.GetExportedValue<ILaberBot>();
-            bot.Run(config);
+            bot.Run();
         }
     }
 }

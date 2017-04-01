@@ -10,6 +10,8 @@
     using Discord.Audio;
     using Discord.Commands;
 
+    using CommandLine;
+
     using log4net;
 
     [Export(typeof(ILaberBot))]
@@ -17,17 +19,19 @@
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LaberBot));
 
+        private readonly DefaultOptions _options;
+
         private readonly DiscordClient _client;
         
-        public BotConfiguration Configuration { get; private set; }
-
         public IReadOnlyCollection<IBotCommand> Commands { get; private set; }
 
         [ImportingConstructor]
         public LaberBot(
+            DefaultOptions options,
             IAudioPlayer audioPlayer,
             [ImportMany]IEnumerable<IBotCommand> commands)
         {
+            _options = options;
             Logger.Info("Creating LaberBot");
 
             _client = new DiscordClient(ConfigureClient);
@@ -56,14 +60,12 @@
             cfg.Mode = AudioMode.Outgoing;
         }
 
-        public void Run(BotConfiguration config)
+        public void Run()
         {
             Logger.Info("Running LaberBot...");
-            Logger.InfoFormat("    Authentication token: {0}", config.AuthToken);
-            Logger.InfoFormat("    Sound directory:      {0}", config.SoundDirectory);
-
-            Configuration = config;
-
+            Logger.InfoFormat("    Authentication token: {0}", _options.AuthToken);
+            Logger.InfoFormat("    Sound directory:      {0}", _options.SoundDirectory);
+            
             _client.ExecuteAndWait(Connect);
 
             Logger.Info("LaberBot stopped");
@@ -71,7 +73,7 @@
 
         private async Task Connect()
         {
-            await _client.Connect(Configuration.AuthToken, TokenType.Bot);
+            await _client.Connect(_options.AuthToken, TokenType.Bot);
             
             Logger.Info("Connected to server");
 

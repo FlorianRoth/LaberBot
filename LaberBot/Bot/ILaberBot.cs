@@ -4,10 +4,8 @@ namespace LaberBot.Bot
 
     public interface ILaberBot
     {
-        BotConfiguration Configuration { get; }
-
         IReadOnlyCollection<IBotCommand> Commands { get; }
 
-        void Run(BotConfiguration config);
+        void Run();
     }
 }

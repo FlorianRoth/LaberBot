@@ -1,28 +1,28 @@
 ﻿namespace LaberBot.Bot
 {
-    using System;
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
     using System.IO;
     using System.Linq;
 
+    using CommandLine;
+
     [Export(typeof(ISoundRepository))]
     public class SoundRepository : ISoundRepository
     {
         private const string SUFFIX = ".wav";
-
-        private readonly Lazy<ILaberBot> _bot;
-
+        
         private readonly IDictionary<string, ISoundFile> _soundFiles;
 
         private readonly FileSystemWatcher _watcher;
 
-        private string SoundDirectory => _bot.Value.Configuration.SoundDirectory;
+        private readonly string _soundDirectory;
 
         [ImportingConstructor]
-        public SoundRepository(Lazy<ILaberBot> bot)
+        public SoundRepository(
+            DefaultOptions options)
         {
-            _bot = bot;
+            _soundDirectory = options.SoundDirectory;
             _soundFiles = new Dictionary<string, ISoundFile>();
 
             _watcher = new FileSystemWatcher();
@@ -33,11 +33,6 @@
         
         private void EnsureInitialized()
         {
-            if (_bot.IsValueCreated)
-            {
-                return;
-            }
-
             LoadSoundFiles();
             StartWatching();
         }
@@ -45,7 +40,7 @@
         private void StartWatching()
         {
             _watcher.IncludeSubdirectories = true;
-            _watcher.Path = SoundDirectory;
+            _watcher.Path = _soundDirectory;
             _watcher.Filter = $"*{SUFFIX}";
             _watcher.EnableRaisingEvents = true;
         }
@@ -80,7 +75,7 @@
 
         private string GetFilePath(string filename)
         {
-            var path = Path.Combine(SoundDirectory, filename);
+            var path = Path.Combine(_soundDirectory, filename);
 
             if (!File.Exists(path))
             {
@@ -97,14 +92,14 @@
 
         private string CreateFileName(string nameWithoutExtension, int counter)
         {
-            return Path.Combine(SoundDirectory, $"{nameWithoutExtension}{counter}{SUFFIX}");
+            return Path.Combine(_soundDirectory, $"{nameWithoutExtension}{counter}{SUFFIX}");
         }
 
 
         private void LoadSoundFiles()
         {
             var soundFiles = Directory
-                .EnumerateFiles(SoundDirectory, $"*{SUFFIX}", SearchOption.AllDirectories)
+                .EnumerateFiles(_soundDirectory, $"*{SUFFIX}", SearchOption.AllDirectories)
                 .Select(CreateSoundFile);
 
             foreach (var file in soundFiles)
@@ -124,7 +119,7 @@
         {
             var dir = Path.GetDirectoryName(path);
 
-            if (dir == SoundDirectory)
+            if (dir == _soundDirectory)
             {
                 return null;
             }

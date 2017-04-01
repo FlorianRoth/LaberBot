@@ -48,14 +48,14 @@
         
         public void Init(ILaberBot bot)
         {
-            _audioService = bot.Client.GetService<AudioService>();
+            _audioService = bot.GetService<AudioService>();
         }
         
         public void Run()
         {
         }
 
-        public async Task PlayAsync(Channel channel, string file)
+        public async Task PlayAsync(IChannel channel, string file)
         {
             var request = new PlayRequest(file);
 
@@ -72,20 +72,21 @@
             
             try
             {
-                if (null == channel)
+                var discordChannel = channel as DiscordChannel;
+                if (null == discordChannel)
                 {
                     Logger.Error("Voice channel not found");
                     return;
                 }
 
                 Logger.Debug($"Joining channel: {channel.Name}");
-                var client = await _audioService.Join(channel);
+                var client = await _audioService.Join(discordChannel.Channel);
 
                 Logger.Debug($"Playing audio file: {file}");
                 SendAudioData(client, request);
 
                 Logger.Debug($"Leaving channel: {channel.Name}");
-                await _audioService.Leave(channel);
+                await _audioService.Leave(discordChannel.Channel);
             }
             catch (Exception ex)
             {

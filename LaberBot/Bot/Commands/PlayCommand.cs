@@ -51,7 +51,7 @@
                 return;
             }
             
-            await _player.PlayAsync(voiceChannel, file.Path);
+            await _player.PlayAsync(new DiscordChannel(voiceChannel), file.Path);
         }
 
         private Channel GetVoiceChannel(CommandEventArgs args)

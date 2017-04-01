@@ -81,14 +81,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
     <Reference Include="WebSocket4Net, Version=0.14.1.0, Culture=neutral, PublicKeyToken=eb4e154b696bf72a, processorArchitecture=MSIL">
       <HintPath>..\packages\WebSocket4Net.0.14.1\lib\net45\WebSocket4Net.dll</HintPath>
       <Private>True</Private>
@@ -106,16 +99,22 @@
     <Compile Include="Bot\Commands\PlayRandomCommand.cs" />
     <Compile Include="Bot\Commands\StopCommand.cs" />
     <Compile Include="Bot\Commands\UploadCommand.cs" />
+    <Compile Include="Bot\DiscordChannel.cs" />
+    <Compile Include="Bot\DiscordServer.cs" />
     <Compile Include="Bot\IAudioPlayer.cs" />
     <Compile Include="Bot\IBotCommand.cs" />
     <Compile Include="Bot\IBotPlugin.cs" />
+    <Compile Include="Bot\IChannel.cs" />
     <Compile Include="Bot\ILaberBot.cs" />
+    <Compile Include="Bot\IServer.cs" />
     <Compile Include="Bot\ISoundFile.cs" />
     <Compile Include="Bot\ISoundRepository.cs" />
+    <Compile Include="Bot\IUser.cs" />
     <Compile Include="Bot\LaberBot.cs" />
     <Compile Include="Bot\SoundFile.cs" />
     <Compile Include="Bot\SoundRepository.cs" />
     <Compile Include="Bot\UploadRequest.cs" />
+    <Compile Include="Bot\DiscordUser.cs" />
     <Compile Include="Launcher.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -65,10 +65,10 @@
             Logger.InfoFormat("  - Server: {0}", _options.Server);
             Logger.InfoFormat("  - User:   {0}", _options.User);
 
-            Logger.Info("Controller key -> sound mappings:");
+            Logger.Info("Controller mappings:");
             foreach (var mapping in SoundMapping)
             {
-                Logger.InfoFormat("  - {0,5}: {1}", mapping.Key, mapping.Value);
+                Logger.InfoFormat("  - {0,-5} -> {1}", mapping.Key, mapping.Value);
             }
             
             _controller.Start();
@@ -83,17 +83,15 @@
             {
                 return;
             }
-
-            var client = _bot.Client;
-
-            var server = client.FindServers(_options.Server).FirstOrDefault();
+            
+            var server = _bot.FindServers(_options.Server).FirstOrDefault();
             if (null == server)
             {
                 Logger.Error("Could not find server");
                 return;
             }
 
-            var user = server.FindUsers(_options.User, true).FirstOrDefault();
+            var user = server.FindUsers(_options.User).FirstOrDefault();
             if (user == null)
             {
                 Logger.Error("Could not find user");

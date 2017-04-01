@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using Discord;
@@ -20,8 +21,8 @@
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LaberBot));
 
         private readonly DefaultOptions _options;
-        
-        public DiscordClient Client { get; }
+
+        private readonly DiscordClient _client;
 
         public IReadOnlyCollection<IBotPlugin> Plugins { get; private set; }
 
@@ -36,9 +37,9 @@
             _options = options;
             Logger.Info("Creating LaberBot");
 
-            Client = new DiscordClient(ConfigureClient);
-            Client.UsingCommands(ConfigureCommands);
-            Client.UsingAudio(ConfigureAudio);
+            _client = new DiscordClient(ConfigureClient);
+            _client.UsingCommands(ConfigureCommands);
+            _client.UsingAudio(ConfigureAudio);
 
             InitPlugins(plugins);
 
@@ -68,18 +69,18 @@
             Logger.InfoFormat("    Authentication token: {0}", _options.AuthToken);
             Logger.InfoFormat("    Sound directory:      {0}", _options.SoundDirectory);
             
-            Client.ExecuteAndWait(Connect);
+            _client.ExecuteAndWait(Connect);
 
             Logger.Info("LaberBot stopped");
         }
 
         private async Task Connect()
         {
-            await Client.Connect(_options.AuthToken, TokenType.Bot);
+            await _client.Connect(_options.AuthToken, TokenType.Bot);
 
             Logger.Info("Connected to server");
 
-            Client.SetGame(_options.Game);
+            _client.SetGame(_options.Game);
 
             foreach (var plugin in Plugins)
             {
@@ -103,7 +104,7 @@
         private void RegisterCommands(IEnumerable<IBotCommand> commands)
         {
             var commandList = new List<IBotCommand>();
-            var commandService = Client.GetService<CommandService>();
+            var commandService = _client.GetService<CommandService>();
             
             Logger.Info("Registering commands:");
 
@@ -141,6 +142,24 @@
             {
                 Logger.Error(ex.Message, ex);
             }
+        }
+
+        public IEnumerable<IServer> FindServers(string name)
+        {
+            return _client.FindServers(name).Select(s => new DiscordServer(s));
+        }
+
+        public T GetService<T>() where T : class
+        {
+            if (false == typeof(IService).IsAssignableFrom(typeof(T)))
+            {
+                throw new ArgumentException($"{nameof(T)} must implement '{typeof(IService)}'");
+            }
+
+            var method = typeof(DiscordClient).GetMethod(nameof(_client.GetService));
+            var genericMethod = method.MakeGenericMethod(typeof(T));
+
+            return (T)genericMethod.Invoke(_client, new object[] { true });
         }
     }
 }

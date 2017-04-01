@@ -52,7 +52,7 @@
             var index = _random.Next(0, allSounds.Count);
             var sound = allSounds[index];
             
-            await _player.PlayAsync(voiceChannel, sound.Path);
+            await _player.PlayAsync(new DiscordChannel(voiceChannel), sound.Path);
         }
 
         private string GetGroup(CommandEventArgs args)

@@ -1,15 +1,15 @@
 namespace LaberBot.Bot
 {
     using System.Collections.Generic;
-
-    using Discord;
-
+    
     public interface ILaberBot
     {
         IReadOnlyCollection<IBotCommand> Commands { get; }
         
-        DiscordClient Client { get; }
-
         void Run();
+
+        IEnumerable<IServer> FindServers(string name);
+
+        T GetService<T>() where T : class;
     }
 }

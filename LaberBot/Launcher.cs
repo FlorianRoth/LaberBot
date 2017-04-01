@@ -1,6 +1,7 @@
 ﻿namespace LaberBot
 {
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel.Composition;
     using System.ComponentModel.Composition.Hosting;
     using System.IO;
@@ -28,11 +29,16 @@
             Logger.Debug("Initializing composition container");
 
             var botDir = GetBotDirectory();
-            
-            var assemblyCatalog = new AssemblyCatalog(typeof(Launcher).Assembly);
-            var directoryCatalog = new DirectoryCatalog(botDir);
+            var pluginDirs = GetPluginFolders(botDir);
 
-            var catalog = new AggregateCatalog(assemblyCatalog, directoryCatalog);
+            var assemblyCatalog = new AssemblyCatalog(typeof(Launcher).Assembly);
+            
+            var catalog = new AggregateCatalog(assemblyCatalog);
+            foreach (var dir in pluginDirs)
+            {
+                var directoryCatalog = new DirectoryCatalog(dir);
+                catalog.Catalogs.Add(directoryCatalog);
+            }
 
             var container = new CompositionContainer(catalog);
             container.ComposeExportedValue(container);
@@ -46,6 +52,15 @@
             var uri = new UriBuilder(codeBase);
             var path = Uri.UnescapeDataString(uri.Path);
             return Path.GetDirectoryName(path);
+        }
+
+        private static IEnumerable<string> GetPluginFolders(string botFolder)
+        {
+            var pluginsDir = Path.Combine(botFolder, "plugins");
+
+            var plugins = Directory.EnumerateDirectories(pluginsDir);
+
+            return plugins;
         }
 
         private static void EvaluateCommandLine(string[] args, CompositionContainer container)

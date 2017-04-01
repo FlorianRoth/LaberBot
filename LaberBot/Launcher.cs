@@ -1,6 +1,10 @@
 ﻿namespace LaberBot
 {
+    using System;
+    using System.ComponentModel.Composition;
     using System.ComponentModel.Composition.Hosting;
+    using System.IO;
+    using System.Reflection;
 
     using log4net;
 
@@ -23,16 +27,31 @@
         {
             Logger.Debug("Initializing composition container");
 
-            var catalog = new AssemblyCatalog(typeof(ILaberBot).Assembly);
+            var botDir = GetBotDirectory();
+            
+            var assemblyCatalog = new AssemblyCatalog(typeof(Launcher).Assembly);
+            var directoryCatalog = new DirectoryCatalog(botDir);
+
+            var catalog = new AggregateCatalog(assemblyCatalog, directoryCatalog);
+
             var container = new CompositionContainer(catalog);
+            container.ComposeExportedValue(container);
 
             return container;
+        }
+
+        private static string GetBotDirectory()
+        {
+            var codeBase = Assembly.GetExecutingAssembly().CodeBase;
+            var uri = new UriBuilder(codeBase);
+            var path = Uri.UnescapeDataString(uri.Path);
+            return Path.GetDirectoryName(path);
         }
 
         private static void EvaluateCommandLine(string[] args, CompositionContainer container)
         {
             Logger.Debug("Evaluating command line");
-
+            
             var commandLineParser = container.GetExportedValue<ICommandLineParser>();
             commandLineParser.Parse(args);
         }

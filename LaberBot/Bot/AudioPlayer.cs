@@ -12,7 +12,8 @@
     using log4net;
 
     [Export(typeof(IAudioPlayer))]
-    public class AudioPlayer : IAudioPlayer
+    [Export(typeof(IBotPlugin))]
+    public class AudioPlayer : IAudioPlayer, IBotPlugin
     {
         private class PlayRequest
         {
@@ -45,9 +46,13 @@
             _lock = new object();
         }
         
-        public void Init(AudioService audioService)
+        public void Init(ILaberBot bot)
         {
-            _audioService = audioService;
+            _audioService = bot.Client.GetService<AudioService>();
+        }
+        
+        public void Run()
+        {
         }
 
         public async Task PlayAsync(Channel channel, string file)

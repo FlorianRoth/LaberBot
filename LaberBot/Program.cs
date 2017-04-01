@@ -26,7 +26,7 @@
             }
             catch (ArgumentException ex)
             {
-                LogManager.GetLogger(typeof(Program)).Debug("Invalid command line arguments", ex);
+                LogManager.GetLogger(typeof(Program)).Error("Invalid command line arguments", ex);
                 PrintUsage();
                 return EXIT_USAGE;
             }

@@ -20,29 +20,31 @@
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LaberBot));
 
         private readonly DefaultOptions _options;
-
-        private readonly DiscordClient _client;
         
+        public DiscordClient Client { get; }
+
+        public IReadOnlyCollection<IBotPlugin> Plugins { get; private set; }
+
         public IReadOnlyCollection<IBotCommand> Commands { get; private set; }
 
         [ImportingConstructor]
         public LaberBot(
             DefaultOptions options,
-            IAudioPlayer audioPlayer,
+            [ImportMany]IEnumerable<IBotPlugin> plugins,
             [ImportMany]IEnumerable<IBotCommand> commands)
         {
             _options = options;
             Logger.Info("Creating LaberBot");
 
-            _client = new DiscordClient(ConfigureClient);
-            _client.UsingCommands(ConfigureCommands);
-            _client.UsingAudio(ConfigureAudio);
+            Client = new DiscordClient(ConfigureClient);
+            Client.UsingCommands(ConfigureCommands);
+            Client.UsingAudio(ConfigureAudio);
 
-            audioPlayer.Init(_client.GetService<AudioService>());
+            InitPlugins(plugins);
 
             RegisterCommands(commands);
         }
-        
+
         private void ConfigureClient(DiscordConfigBuilder cfg)
         {
             cfg.AppName = "LaberBot";
@@ -66,28 +68,48 @@
             Logger.InfoFormat("    Authentication token: {0}", _options.AuthToken);
             Logger.InfoFormat("    Sound directory:      {0}", _options.SoundDirectory);
             
-            _client.ExecuteAndWait(Connect);
+            Client.ExecuteAndWait(Connect);
 
             Logger.Info("LaberBot stopped");
         }
 
         private async Task Connect()
         {
-            await _client.Connect(_options.AuthToken, TokenType.Bot);
-            
+            await Client.Connect(_options.AuthToken, TokenType.Bot);
+
             Logger.Info("Connected to server");
 
-            _client.SetGame("Bortogen");
+            Client.SetGame(_options.Game);
+
+            foreach (var plugin in Plugins)
+            {
+                plugin.Run();
+            }
+        }
+
+        private void InitPlugins(IEnumerable<IBotPlugin> plugins)
+        {
+            Logger.Info("Loading plugins:");
+
+            Plugins = plugins.ToList();
+
+            foreach (var plugin in Plugins)
+            {
+                Logger.InfoFormat("    - {0}", plugin.GetType().Name);
+                plugin.Init(this);
+            }
         }
 
         private void RegisterCommands(IEnumerable<IBotCommand> commands)
         {
             var commandList = new List<IBotCommand>();
-            var commandService = _client.GetService<CommandService>();
+            var commandService = Client.GetService<CommandService>();
+            
+            Logger.Info("Registering commands:");
 
             foreach (var cmd in commands)
             {
-                Logger.Info($"  Registering command '{cmd.Command}'");
+                Logger.Info($"  - {cmd.Command}");
 
                 var builder = commandService.CreateCommand(cmd.Command);
                 builder.Description(cmd.Description);

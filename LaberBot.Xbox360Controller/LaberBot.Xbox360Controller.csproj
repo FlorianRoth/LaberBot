@@ -72,6 +72,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ControllerMapping.cs" />
+    <Compile Include="ControllerMappingConfiguration.cs" />
     <Compile Include="ControllerEventArgs.cs" />
     <Compile Include="ControllerOptions.cs" />
     <Compile Include="ControllerPlugin.cs" />

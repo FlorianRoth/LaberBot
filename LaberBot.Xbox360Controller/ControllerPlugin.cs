@@ -1,7 +1,7 @@
 ﻿namespace LaberBot.Xbox360Controller
 {
-    using System.Collections.Generic;
     using System.ComponentModel.Composition;
+    using System.IO;
     using System.Linq;
 
     using log4net;
@@ -9,27 +9,13 @@
     using LaberBot.Bot;
     using LaberBot.Xbox360Controller.Device;
 
+    using Newtonsoft.Json;
+
     [Export(typeof(IBotPlugin))]
     public class ControllerPlugin : IBotPlugin
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ControllerPlugin));
-
-        private static readonly IDictionary<ControllerEventArgs.KeyCode, string> SoundMapping = new Dictionary<ControllerEventArgs.KeyCode, string>
-                {
-                    { ControllerEventArgs.KeyCode.A, "achja" },
-                    { ControllerEventArgs.KeyCode.B, "gleiten" },
-                    { ControllerEventArgs.KeyCode.X, "nyx" },
-                    { ControllerEventArgs.KeyCode.Y, "Hallo" },
-                    { ControllerEventArgs.KeyCode.L, "hafen" },
-                    { ControllerEventArgs.KeyCode.R, "hass" },
-                    { ControllerEventArgs.KeyCode.Back, "schanuze" },
-                    { ControllerEventArgs.KeyCode.Start, "radar" },
-                    { ControllerEventArgs.KeyCode.Up, "band" },
-                    { ControllerEventArgs.KeyCode.Down, "fcb" },
-                    { ControllerEventArgs.KeyCode.Left, "m1" },
-                    { ControllerEventArgs.KeyCode.Right, "kohlen" }
-                };
-
+        
         private readonly ControllerOptions _options;
 
         private readonly IController _controller;
@@ -39,6 +25,8 @@
         private readonly ISoundRepository _soundRepository;
         
         private ILaberBot _bot;
+
+        private ControllerMapping _controllerMapping;
 
         [ImportingConstructor]
         public ControllerPlugin(
@@ -51,12 +39,37 @@
             _controller = controller;
             _player = player;
             _soundRepository = soundRepository;
+
             controller.KeyPressed += OnKeyPressed;
         }
 
         public void Init(ILaberBot bot)
         {
             _bot = bot;
+
+            var config = ReadConfig();
+            _controllerMapping = new ControllerMapping(config);
+        }
+
+        private ControllerMappingConfiguration ReadConfig()
+        {
+            const string CONFIG_FILE = "controllermapping.json";
+
+            if (false == File.Exists(CONFIG_FILE))
+            {
+                Logger.WarnFormat("Controller mapping file '{0}' not found. Using default configuration", CONFIG_FILE);
+                return new ControllerMappingConfiguration();
+            }
+
+            using (var reader = new StreamReader(CONFIG_FILE))
+            using (var jsonReader = new JsonTextReader(reader))
+            {
+
+                var serializer = new JsonSerializer();
+                var config = serializer.Deserialize<ControllerMappingConfiguration>(jsonReader);
+
+                return config;
+            }
         }
 
         public void Run()
@@ -66,7 +79,7 @@
             Logger.InfoFormat("  - User:   {0}", _options.User);
 
             Logger.Info("Controller mappings:");
-            foreach (var mapping in SoundMapping)
+            foreach (var mapping in _controllerMapping)
             {
                 Logger.InfoFormat("  - {0,-5} -> {1}", mapping.Key, mapping.Value);
             }
@@ -120,7 +133,7 @@
         private string GetSound(ControllerEventArgs.KeyCode key)
         {
             string sound;
-            SoundMapping.TryGetValue(key, out sound);
+            _controllerMapping.TryGetValue(key, out sound);
 
             return sound;
         }
